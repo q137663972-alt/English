@@ -19,7 +19,7 @@
 
   /* ---------- 配置（每个项目不同） ---------- */
   var APP       = "english";
-  var HOT_BASE  = "https://q137663972-alt.github.io/12/hot/";
+  var HOT_BASE  = "https://q137663972-alt.github.io/English/hot/";
   var HOT_TOKEN = "english-2026";
   var BUILTIN   = [
     "js/cp.js",
@@ -32,7 +32,7 @@
     "js/update.js"
   ];
   var BIG = [];                       // 大文件：缓存失败就继续用内置的（英语/数学没有大文件）
-  var CP_BASE = "https://q137663972-alt.github.io/12/content/";
+  var CP_BASE = "https://q137663972-alt.github.io/English/content/";
 
   var T_MANIFEST = 6000;              // 拉 manifest 超时
   var T_FILE     = 20000;             // 拉单个文件超时

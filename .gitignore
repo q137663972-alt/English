@@ -14,3 +14,5 @@ content/
 # 热更包与 Pages 发布目录（由 tools/gen-hot.mjs / CI 生成，不入库）
 hot/
 page/
+/chinese/
+/math/
