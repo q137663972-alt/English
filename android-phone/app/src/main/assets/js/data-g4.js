@@ -1,4 +1,4 @@
-(function(g){ (window.GRADES = window.GRADES || []).push(g); })({
+(function(g){ window.CP && window.CP.setGrade ? window.CP.setGrade(g) : (window.GRADES = window.GRADES || []).push(g); })({
   g:4,
   books:[
     { n:"四年级上册", u:[
