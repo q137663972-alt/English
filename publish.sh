@@ -36,10 +36,22 @@ else
   ./build-apk.sh "${1:-}" || { echo "❌ 构建失败，未发布"; exit 1; }
 fi
 
+# 1.5 生成热更资源包（js / css 改动全靠它下发，不用出新 APK）
+#     tools/gen-pack.mjs 会扫 css + js（boot.js 除外，它是冻结文件），
+#     新增的 js/praise.js 这类普通文件会被 boot.js 追加到末尾加载。
+gen_hot() {
+  local dir="$1" label="$2"
+  [ -d "/workspace/$dir/tools" ] || return 0
+  echo ""
+  echo "════ 生成 $label 热更包 ════"
+  ( cd "/workspace/$dir" && node tools/gen-pack.mjs --out page/hot/pack ) 2>&1 \
+    | grep -E "build|总计|❌" | sed 's/^/   /'
+}
+
 # 2. 每个包推到对应仓库的 gh-pages（Pages 直链）
-#    $1=仓库名 $2=APK 文件名 $3=Pages 路径名
+#    $1=仓库名 $2=APK 文件名 $3=Pages 路径名 $4=项目目录（放热更包用）
 publish() {
-  local repo="$1" apk="$2" page="$3"
+  local repo="$1" apk="$2" page="$3" sdir="$4"
   [ -f "/workspace/apk/$apk" ] || { echo "跳过（未产出）：$apk"; return 0; }
   echo ""
   echo "════ 发布 $apk → $repo gh-pages ════"
@@ -57,6 +69,12 @@ publish() {
       || git checkout -q -B gh-pages
     mkdir -p apk && cp "/workspace/apk/$apk" "apk/$apk"
     git add -f "apk/$apk"
+    # 热更包一起发：hot/ 在 .gitignore 里，需要 -f 强制入仓
+    if [ -n "$sdir" ] && [ -d "/workspace/$sdir/page/hot/pack" ]; then
+      mkdir -p hot/pack && cp -f "/workspace/$sdir/page/hot/pack/"* hot/pack/ 2>/dev/null
+      git add -f hot/pack
+      echo "   附带热更包 build $(python3 -c "import json;print(json.load(open('hot/pack/manifest.json'))['build'])" 2>/dev/null)"
+    fi
     if git diff --cached --quiet; then
       echo "   APK 内容与线上一致，无需提交"
       exit 0
@@ -91,14 +109,14 @@ sync_main() {
 
 FILTER="${1:-}"
 case "$FILTER" in
-  ""|chinese) publish chinese ChinesePlayground.apk chinese && sync_main chinese 语文 ;;
+  ""|chinese) gen_hot chinese 语文 && publish chinese ChinesePlayground.apk chinese chinese && sync_main chinese 语文 ;;
 esac
 case "$FILTER" in
-  ""|math)     publish math     MathPlayground.apk    math     && sync_main math     数学 ;;
+  ""|math)     gen_hot math 数学 && publish math MathPlayground.apk math math && sync_main math 数学 ;;
 esac
 case "$FILTER" in
-  ""|english)  publish English  EnglishPlayground.apk English  && sync_main .        英语 ;;
+  ""|english)  gen_hot . 英语 && publish English EnglishPlayground.apk English . && sync_main . 英语 ;;
 esac
 
 echo ""
-echo "完成。首次发布 Pages 需 1~2 分钟生效。"
+echo "完成。APK 直链即时生效；热更包要等 App 下次启动自动拉取（约 1~2 分钟）。"
