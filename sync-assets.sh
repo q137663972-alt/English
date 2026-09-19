@@ -17,7 +17,7 @@ cd "$ROOT"
 
 # 项目目录 : 该项目的 Android 壳目录列表
 PROJECTS=(
-  "chinese:chinese/chinese-app chinese/chinese-phone"
+  "chinese:chinese/chinese-universal"
   ".:android-app android-phone"
   "math:math/math-app math/math-phone"
 )
@@ -48,6 +48,9 @@ for entry in "${PROJECTS[@]}"; do
   if [ -d "$proj_dir/js" ]; then
     while IFS= read -r f; do files+=("js/$(basename "$f")"); done < <(find "$proj_dir/js" -maxdepth 1 -name '*.js' -type f | sort)
   fi
+  if [ -d "$proj_dir/img" ]; then
+    while IFS= read -r f; do files+=("img/$(basename "$f")"); done < <(find "$proj_dir/img" -maxdepth 1 -name '*.webp' -type f | sort)
+  fi
   [ ${#files[@]} -eq 0 ] && { echo "  无源文件，跳过"; continue; }
 
   for sh in $shells; do
@@ -75,8 +78,9 @@ for entry in "${PROJECTS[@]}"; do
       rel="${extra#$sh_assets/}"
       case "$rel" in
         js/*) grep -Fxq "$rel" <(printf '%s\n' "${files[@]}") || echo "     ℹ 仅壳内有  $rel" ;;
+        img/*) grep -Fxq "$rel" <(printf '%s\n' "${files[@]}") || echo "     ℹ 仅壳内有  $rel" ;;
       esac
-    done < <(find "$sh_assets/js" -maxdepth 1 -name '*.js' -type f 2>/dev/null)
+    done < <(find "$sh_assets/js" -maxdepth 1 -name '*.js' -type f 2>/dev/null; find "$sh_assets/img" -maxdepth 1 -name '*.webp' -type f 2>/dev/null)
 
     [ $APPLY -eq 1 ] && echo "     已同步：$((fix+miss)) 个（新增 $miss / 更新 $fix），一致 $ok"
     total_ok=$((total_ok+ok)); total_fix=$((total_fix+fix)); total_miss=$((total_miss+miss))

@@ -4,7 +4,7 @@
 #      构建完成后把 APK 拷回 ./apk/。compileSdk 由 ~/.gradle/init.d/compilesdk.gradle 覆盖为 35。
 #
 # 用法：
-#   ./build-apk.sh                # 构建全部 6 个壳
+#   ./build-apk.sh                # 构建全部 5 个壳
 #   ./build-apk.sh chinese        # 只构建名字含 chinese 的壳
 set -o pipefail
 
@@ -28,8 +28,7 @@ set -a; . "$KS_PROPS"; set +a
 
 # 项目:壳:输出名
 TARGETS=(
-  "chinese/chinese-app:ChinesePlayground-TV"
-  "chinese/chinese-phone:ChinesePlayground-Phone"
+  "chinese/chinese-universal:ChinesePlayground"
   "math/math-app:MathPlayground-TV"
   "math/math-phone:MathPlayground-Phone"
   "android-app:EnglishPlayground-TV"
