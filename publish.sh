@@ -27,7 +27,12 @@ fi
 
 AUTH="$(printf '%s:%s' "$GH_USER" "$GIT_TOKEN" | base64 -w0)"
 HDR="http.extraHeader=Authorization: Basic $AUTH"
-gh() { git -c "$HDR" "$@"; }
+# -c 里带身份：/tmp 里新克隆的仓库没有 user.name/email，commit 会直接失败
+gh() {
+  git -c "$HDR" \
+      -c "user.name=$GH_USER" \
+      -c "user.email=${GH_USER}@users.noreply.github.com" "$@"
+}
 
 # 1. 构建并签名（SKIP_BUILD=1 时用已有 ./apk 里的包）
 if [ "${SKIP_BUILD:-0}" = "1" ]; then
@@ -79,7 +84,7 @@ publish() {
       echo "   APK 内容与线上一致，无需提交"
       exit 0
     fi
-    git commit -q -m "发布 $apk（$(date +%F)）"
+    gh commit -q -m "发布 $apk + 热更包（$(date +%F)）" || { echo "   ❌ 提交失败"; exit 1; }
     # 代理偶发 403（大二进制被限流），重试 3 次
     for i in 1 2 3; do
       if gh push -q origin HEAD:gh-pages 2>/tmp/pub-err-$repo; then
@@ -102,7 +107,7 @@ sync_main() {
   ( cd "/workspace/$d" \
     && git add -A \
     && { git diff --cached --quiet && echo "      main 无改动" \
-         || { git commit -q -m "chore: 同步源码与脚本（$(date +%F)）" && echo "      已提交"; }; } \
+         || { gh commit -q -m "chore: 同步源码与脚本（$(date +%F)）" && echo "      已提交"; }; } \
     && { gh push -q origin HEAD:main 2>/tmp/sync-err-$label && echo "      ✅ main 已推送" \
          || { echo "      ❌ main 推送失败：$(tail -2 /tmp/sync-err-$label)"; false; }; } )
 }
