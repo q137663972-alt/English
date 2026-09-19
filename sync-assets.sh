@@ -18,8 +18,8 @@ cd "$ROOT"
 # 项目目录 : 该项目的 Android 壳目录列表
 PROJECTS=(
   "chinese:chinese/chinese-universal"
-  ".:android-app android-phone"
-  "math:math/math-app math/math-phone"
+  ".:android-universal"
+  "math:math/math-universal"
 )
 
 # 需要同步的相对路径（相对项目根目录）

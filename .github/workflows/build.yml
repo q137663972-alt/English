@@ -1,10 +1,9 @@
-name: Build Android APK (TV + Phone)
+name: Build Android APK (Universal)
 
 on:
   push:
     paths:
-      - 'android-app/**'
-      - 'android-phone/**'
+      - 'android-universal/**'
       - 'index.html'
       - 'css/**'
       - 'js/**'
@@ -23,10 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - project: android-app
-            artifact: EnglishPlaygroundTV-apk
-          - project: android-phone
-            artifact: EnglishPlaygroundPhone-apk
+          - project: android-universal
+            artifact: EnglishPlayground-apk
     name: Build ${{ matrix.project }}
     steps:
       - name: Checkout
@@ -138,7 +135,7 @@ jobs:
           if [ -d apks ]; then
             for d in apks/*/; do
               n=$(basename "$d")
-              out=$(echo "$n" | sed -E 's/^(.*)(TV|Phone)-apk$/\1-\2.apk/')
+              out=$(echo "$n" | sed -E 's/-apk$/.apk/')
               find "$d" -name '*.apk' -exec cp {} "page/apk/$out" \;
             done
           fi

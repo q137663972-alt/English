@@ -104,78 +104,48 @@ python3 -m http.server 8000
 
 想增改内容，直接编辑对应 `js/data-gN.js`，无需改动玩法代码。
 
-## 📺 安卓电视 / 机顶盒版（APK）
+## 📱 安卓 APK（手机 / 平板 / 电视 一个包）
 
-英语乐园可以打包成安卓安装包，装到电视机或机顶盒上用**遥控器**玩。
+英语乐园打成一个**通用安装包**：手机、平板、电视、机顶盒装的是同一个 APK，
+不再区分「手机版 / 电视版」。工程位于 `android-universal/`，是一个原生 `WebView` 壳，
+把本 H5 整体包进 `assets/` 后加载 `file:///android_asset/index.html`。
 
-工程位于 `android-app/`，是一个原生 `WebView` 壳：把本 H5 整体包进 `assets/`，加载 `index.html#tv` 即自动进入「遥控器模式」。兼容普通安卓机顶盒与 Android TV（首页横幅入口）。
+### 一个包怎么同时伺候三种设备
 
-### 适配做了什么
-- **遥控器方向键（D-pad）导航**：自动给所有可点元素打焦点，方向键在卡片/选项间按几何最近邻移动，确认键（OK/Enter）选中并触发点击。
-- **横屏大屏布局**：放宽页面宽度、放大字号、网格多列。电视端（`body.tv`）额外做了**比手机更醒目**的样式——焦点光晕加粗放大、开关放大到 92×50 并带「开/关」文字与强描边、图标与 emoji 再放大，沙发远距离也看得清。
-- **发音**：电视盒子常无系统语音包，自动强制走有道 MP3（需联网）。
-- **跟读（麦克风）**：带麦遥控器（如部分 Android TV / 机顶盒语音遥控）通过原生 `SpeechRecognizer` 桥接实现**真跟读打分**，首次使用会请求录音权限；无麦克风或拒绝授权的设备自动隐藏麦克风按钮、改为「✅ 我读啦，过关」兜底，不会卡关。
+| 能力 | 做法 |
+|---|---|
+| 桌面入口 | 同时声明 `LAUNCHER` 与 `LEANBACK_LAUNCHER`，手机桌面和 Android TV 首页横幅都出现 |
+| 屏幕方向 | 不写死：电视锁横屏、手机锁竖屏、平板（`sw ≥ 600dp`）交给系统自由旋转 |
+| TV 模式判定 | 原生桥 `AndroidDevice.isTV()` 三重兜底（UiMode / leanback feature / 无触摸屏），比 UA 猜测准；浏览器里仍可用 `#tv` 强制模拟 |
+| 硬件特性 | 触摸屏、麦克风、leanback 全部 `required=false`，无触摸屏的盒子不会被商店过滤掉 |
+| 遥控器导航 | D-pad 方向键几何最近邻移动焦点，确认键触发点击；返回键先交给 H5 导航栈 |
+| 跟读（麦克风） | 原生 `SpeechRecognizer` 桥接（`en-US`），无麦或拒授权自动回落「✅ 我读啦，过关」 |
 
-> 手机 / 桌面浏览器打开**完全不受影响**——TV 适配仅在 `#tv` 模式或电视/盒子 UA 下启用。
+> 包名统一为 `com.example.englishplayground`（旧的 `.phone` 包名已废弃）。
+> 手机 / 桌面浏览器打开 H5 **完全不受影响**——TV 适配仅在判定为电视时启用。
 
-### 本机构建 APK
-需要：Android Studio（或 Android SDK + Gradle）、一台能联网下载依赖的电脑。
+### 构建 APK
 
-**方式一（推荐）**：用 Android Studio 打开 `android-app/` 目录 → 菜单 **Build → Generate Signed Bundle / APK** → 选 **APK** → 生成签名（或先用默认 debug key）→ 构建完成后产物在 `android-app/app/build/outputs/apk/release/app-release.apk`（或 `debug/` 目录）。
+**方式一：GitHub Actions（推荐，免本地环境）**
+推送后自动构建；也可在仓库 **Actions → Build Android APK (Universal) → Run workflow** 手动触发。
+约 5–10 分钟后在页面底部 **Artifacts** 下载 `EnglishPlayground-apk`
+（CI 里重命名为 `EnglishPlayground.apk`，并随 Pages 发布到 `…/English/apk/` 供应用内升级）。
 
-**方式二（命令行）**：
+> ⚠️ CI 出包依赖 4 个签名 Secret（`KEY_ALIAS` / `KEYSTORE_STORE_PASS` / `KEYSTORE_KEY_PASS` / `KEYSTORE_BASE64`），
+> 没填则只出未签名包（装不上）。签名密钥不入库，见 `setup-keystore.sh`。
+
+**方式二：Android Studio / 命令行**
 ```bash
-cd android-app
-./gradlew assembleRelease   # 首次会自动补齐 gradle wrapper
+cd android-universal
+./gradlew assembleRelease
 ```
 
-> ⚠️ 本沙箱到 Google 下载源（Android SDK / Gradle 依赖）被网络拦截，无法在此直接编译出 APK；请用下面的方式三（GitHub Actions）或在本机出包。
-
-**方式三（推荐，免本地环境）**：仓库已内置 `.github/workflows/build.yml`。推送后 GitHub 海外服务器会自动构建；也可在仓库 **Actions → Build Android APK (TV + Phone) → Run workflow** 手动触发。约 5–10 分钟后，在页面底部 **Artifacts** 下载：
-
-| 产物名 | 对应工程 | 适用设备 |
-|---|---|---|
-| `EnglishPlaygroundTV-apk` | `android-app/` | 电视 / 机顶盒（遥控器模式） |
-| `EnglishPlaygroundPhone-apk` | `android-phone/` | 安卓手机（原版 H5 样式） |
-
-产物为 debug 签名 APK，开启「未知来源」即可直接安装。
-
-> 需要登录 GitHub 才能下载产物，安装包不对外公开提供直链下载。
-
-### 安装到电视 / 机顶盒
-- **ADB（推荐）**：电视需开启「开发者选项 → 网络调试 / USB 调试」，与电脑同一局域网：
-  ```bash
-  adb connect <电视IP>:5555
-  adb install app-release.apk
-  ```
-- 或把 APK 拷到 U 盘，在电视文件管理器里点击安装。
-- 普通安卓机顶盒直接安装即可；Android TV 会在首页以横幅（banner）形式显示入口。
+### 安装
+- **手机 / 平板**：APK 传到设备后点击安装，允许「未知来源」即可。
+- **电视 / 机顶盒**：`adb connect <电视IP>:5555 && adb install app-release.apk`，或拷 U 盘在电视文件管理器里装。
+- ⚠️ 若设备上装过旧版（电视版 / 手机版），因**签名已更换**无法覆盖升级，请先卸载旧版再安装。
 
 ### 已知限制
 - 发音需联网（有道 MP3）；离线环境点读无声音。
-- 跟读真识别依赖系统语音服务（Google 语音识别）。部分无麦或没装语音服务的盒子会自动回落「我读啦」手动兜底；首次使用会弹录音授权。
-- 建议横屏使用；老旧盒子若 WebView 版本过旧，可在应用商店升级「Android System WebView」。
-
-## 📱 安卓手机版（APK）
-
-给手机用的安装包，**界面完全沿用原版 H5 的移动端样式**（不是电视大屏那套）。
-
-工程位于 `android-phone/`，与电视版的差别只有"壳"部分，H5 内容共用同一份：
-
-| 项目 | 电视版 `android-app/` | 手机版 `android-phone/` |
-|---|---|---|
-| 加载地址 | `index.html#tv`（遥控器模式） | `index.html`（原版手机样式） |
-| 屏幕方向 | 横屏 landscape | 竖屏 portrait |
-| 桌面入口 | `LAUNCHER` + `LEANBACK_LAUNCHER` | 仅 `LAUNCHER`（不出现在电视桌面） |
-| TV 横幅 | 有 banner | 无 |
-| 触摸屏 | `required=false` | `required=true` |
-| 包名 | `com.example.englishplayground` | `com.example.englishplayground.phone` |
-
-> 包名不同，所以**电视版和手机版可以同时装在一台设备上，互不覆盖**。
-
-手机版同样带**原生 `SpeechRecognizer` 麦克风桥接**，跟读游戏可以真读真打分（首次使用弹录音授权，拒绝则回落「✅ 我读啦，过关」）。
-
-### 构建与安装
-与电视版完全相同，三选一：Android Studio 打开 `android-phone/`、命令行 `./gradlew assembleDebug`、或用仓库内置的 **GitHub Actions**（下载 `EnglishPlaygroundPhone-apk` 产物）。
-
-装到手机：把 APK 传到手机（微信/QQ/数据线均可）→ 点击安装 → 允许「未知来源」→ 打开即可，使用体验与浏览器里打开 H5 一致。
+- 跟读真识别依赖系统语音服务；无麦或没装语音服务的盒子自动回落手动兜底。
+- 老旧盒子若 WebView 版本过旧，可在应用商店升级「Android System WebView」。
