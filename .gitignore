@@ -1,6 +1,7 @@
 
 # 构建产物不入库
 *.apk
+!apk/EnglishPlayground.apk
 
 # 签名钥匙 —— 绝不入库（丢了就无法覆盖升级 App）
 /keystore/
@@ -16,3 +17,8 @@ hot/
 page/
 /chinese/
 /math/
+
+# Gradle / AGP 构建产物
+.gradle/
+build/
+local.properties

@@ -734,3 +734,36 @@ function startChallenge(){
   draw();
   timer = setInterval(tick, 1000);
 }
+
+/* ===================== 玩法注册表（新增玩法支持热更） =====================
+ * 新增玩法不用出新 APK：把新玩法写进 js/game-xxx.js，在文件里调用
+ *   registerGame({ id:"mygame", name:"新玩法", icon:"🎯", desc:"一句话说明", start: startMy });
+ * tools/gen-pack.mjs 会自动扫到它（从 registerGame({id:"…"}) 读出 id），
+ * boot.js 把这类文件插在 js/games.js 之后加载 —— 首页自动出现入口。
+ * ======================================================================== */
+window.GAMES = window.GAMES || [];
+window.registerGame = function (g) {
+  if (!g || !g.id) return null;
+  for (var i = 0; i < window.GAMES.length; i++) {
+    if (window.GAMES[i].id === g.id) { window.GAMES[i] = g; return g; }   // 同 id 覆盖（热更改玩法）
+  }
+  window.GAMES.push(g);
+  return g;
+};
+window.getGame = function (id) {
+  for (var i = 0; i < window.GAMES.length; i++) if (window.GAMES[i].id === id) return window.GAMES[i];
+  return null;
+};
+registerGame({ id:"listen", name:"听音选图", icon:"🔊", desc:"听发音，选正确的图", start: startListen });
+registerGame({ id:"picture", name:"看图识词", icon:"👀", desc:"看图片，选正确单词", start: startPicture });
+registerGame({ id:"spelling", name:"单词拼写", icon:"✏️", desc:"听一听，拼出单词", start: startSpelling });
+registerGame({ id:"memory", name:"翻牌配对", icon:"🃏", desc:"翻牌记忆，配对图与词", start: startMemory });
+registerGame({ id:"read", name:"跟读打分", icon:"🎤", desc:"跟着读，AI 来打分", start: startRead });
+registerGame({ id:"sentence", name:"连词成句", icon:"🧩", desc:"把词块排成一句话", start: startSentence });
+registerGame({ id:"fill", name:"句型填空", icon:"📝", desc:"给句型选个合适的词", start: startFill });
+registerGame({ id:"dialog", name:"情景对话", icon:"💬", desc:"补全对话，开口说", start: startDialog });
+registerGame({ id:"sound", name:"听音辨词", icon:"👂", desc:"近音词辨析，仔细听", start: startSound });
+registerGame({ id:"cn2en", name:"看中文选英文", icon:"🇨🇳", desc:"看中文，选英文单词", start: startCn2en });
+registerGame({ id:"eliminate", name:"单词消消乐", icon:"💥", desc:"图文配对，消掉它们", start: startEliminate });
+registerGame({ id:"sort", name:"分类归筐", icon:"🗂️", desc:"把单词放进主题筐", start: startSort });
+registerGame({ id:"challenge", name:"限时挑战", icon:"⏱️", desc:"60秒连击，挑战最高分", start: startChallenge });
