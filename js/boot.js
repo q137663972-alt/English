@@ -39,6 +39,7 @@
     "js/data-g1.js", "js/data-g2.js", "js/data-g3.js",
     "js/data-g4.js", "js/data-g5.js", "js/data-g6.js",
     "js/tts.js",
+    "js/praise.js",
     "js/games.js",
     "js/app.js",
     "js/tv.js",
@@ -158,7 +159,7 @@
       if (p === "js/games.js" && m && m.games && m.games.length) {
         for (var g = 0; g < m.games.length; g++) {
           var gp = m.games[g].file || m.games[g];
-          if (typeof gp === "string" && gp) {
+          if (typeof gp === "string" && gp && BUILTIN.indexOf(gp) < 0) {
             out.push({ name: gp, url: "https://local.hot/" + gp, hot: true, game: true });
           }
         }
