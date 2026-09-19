@@ -3,6 +3,10 @@
 *.apk
 !apk/EnglishPlayground.apk
 
+# 本地凭据 —— 绝不入库
+.git_token
+.env
+
 # 签名钥匙 —— 绝不入库（丢了就无法覆盖升级 App）
 /keystore/
 *.jks
