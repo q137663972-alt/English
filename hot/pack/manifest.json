@@ -1,0 +1,14 @@
+{
+  "app": "english",
+  "sig": "english-2026",
+  "build": "d360b735d1625f25",
+  "min_apk": 6,
+  "ts": 1789810941027,
+  "packs": [
+    {
+      "name": "code.zip",
+      "sha256": "ae9b2f991c0d4cae478fc5538dc6deb9a7c937010c3598aaab3366357f915cfe",
+      "size": 53225
+    }
+  ]
+}
