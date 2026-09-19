@@ -49,12 +49,13 @@ function startListen(){
       if(chosen.e === r.correct.e){ el.classList.add("correct"); correct++; fb.textContent = "✅ 答对啦！"; fb.className = "feedback ok"; }
       else{
         el.classList.add("wrong"); fb.textContent = "❌ 再听一次～"; fb.className = "feedback no";
+        speak(r.correct.e);
         $all(".opt").forEach(function(o, j){ if(opts[j].e === r.correct.e) o.classList.add("correct"); });
       }
       setTimeout(function(){
         cur++;
         if(cur < rounds.length) renderRound(); else finishGame(correct, rounds.length, "听音选图");
-      }, 1100);
+      }, 1700);
     };
   }
   renderRound();
@@ -83,12 +84,13 @@ function startPicture(){
       if(chosen.e === r.correct.e){ el.classList.add("correct"); correct++; fb.textContent = "✅ 太棒了！"; fb.className = "feedback ok"; }
       else{
         el.classList.add("wrong"); fb.textContent = "❌ 正确答案在下面"; fb.className = "feedback no";
+        speak(r.correct.e);          /* 答错也念，别让孩子只看到字母听不到音 */
         $all(".opt").forEach(function(o, j){ if(opts[j].e === r.correct.e) o.classList.add("correct"); });
       }
       setTimeout(function(){
         cur++;
         if(cur < rounds.length) renderRound(); else finishGame(correct, rounds.length, "看图识词");
-      }, 1100);
+      }, 1700);
     };
   }
   renderRound();
@@ -127,13 +129,13 @@ function startSpelling(){
         var typed = Array.prototype.map.call(ans.children, function(s){ return s.textContent; }).join("");
         var fb = $("#fb");
         if(typed === w.e){ correct++; fb.textContent = "✅ 拼对啦！"; fb.className = "feedback ok"; speak(w.e); }
-        else{ fb.textContent = "❌ 再试试"; fb.className = "feedback no"; }
+        else{ fb.textContent = "❌ 再试试"; fb.className = "feedback no"; speak(w.e); }
         setTimeout(function(){
           if(fb.className.indexOf("ok") >= 0){
             cur++;
             if(cur < list.length) renderRound(); else finishGame(correct, list.length, "单词拼写");
           } else resetSpelling();
-        }, 1000);
+        }, 1600);
       }
     };
     window.resetSpelling = function(){
@@ -350,13 +352,13 @@ function startSentence(){
         var fb = $("#fb");
         if(built === words.join(" ")){
           correct++; fb.textContent = "✅ 排对啦！"; fb.className = "feedback ok"; speak(s.e);
-        } else { fb.textContent = "❌ 顺序不对，再试"; fb.className = "feedback no"; }
+        } else { fb.textContent = "❌ 顺序不对，再试"; fb.className = "feedback no"; speak(s.e); }
         setTimeout(function(){
           if(fb.className.indexOf("ok") >= 0){
             cur++;
             if(cur < list.length) renderRound(); else finishGame(correct, list.length, "连词成句");
           } else { usedIdx = []; draw(); }
-        }, 1200);
+        }, 1800);
       }
     };
     window.unpickWord = function(k){ usedIdx.splice(k, 1); draw(); };
@@ -410,12 +412,13 @@ function startFill(){
         fb.textContent = "✅ 对啦：" + r.s.e; fb.className = "feedback ok"; speak(r.s.e);
       } else {
         el.classList.add("wrong"); fb.textContent = "❌ 正确词是 " + r.blank.w; fb.className = "feedback no";
+        speak(r.blank.w);
         $all(".opt").forEach(function(o, j){ if(opts[j].toLowerCase() === r.blank.w.toLowerCase()) o.classList.add("correct"); });
       }
       setTimeout(function(){
         cur++;
         if(cur < list.length) renderRound(); else finishGame(correct, list.length, "句型填空");
-      }, 1500);
+      }, 2000);
     };
   }
   renderRound();
@@ -462,12 +465,13 @@ function startDialog(){
         fb.textContent = "✅ 说得真好！"; fb.className = "feedback ok"; speak(opts[i].e);
       } else {
         el.classList.add("wrong"); fb.textContent = "❌ 看看正确的回答"; fb.className = "feedback no";
+        speak(p.b.e);
         $all(".opt").forEach(function(o, j){ if(opts[j].e === p.b.e) o.classList.add("correct"); });
       }
       setTimeout(function(){
         cur++;
         if(cur < list.length) renderRound(); else finishGame(correct, list.length, "情景对话");
-      }, 1500);
+      }, 2000);
     };
   }
   renderRound();
@@ -499,12 +503,13 @@ function startSound(){
         fb.textContent = "✅ 耳朵真灵！"; fb.className = "feedback ok"; speak(opts[i].e);
       } else {
         el.classList.add("wrong"); fb.textContent = "❌ 是 " + r.correct.e; fb.className = "feedback no";
+        speak(r.correct.e);
         $all(".opt").forEach(function(o, j){ if(opts[j].e === r.correct.e) o.classList.add("correct"); });
       }
       setTimeout(function(){
         cur++;
         if(cur < rounds.length) renderRound(); else finishGame(correct, rounds.length, "听音辨词");
-      }, 1300);
+      }, 1900);
     };
   }
   renderRound();
@@ -535,12 +540,13 @@ function startCn2en(){
       if(chosen.e === r.correct.e){ el.classList.add("correct"); correct++; fb.textContent = "✅ 答对啦！"; fb.className = "feedback ok"; }
       else{
         el.classList.add("wrong"); fb.textContent = "❌ 正确答案在下面"; fb.className = "feedback no";
+        speak(r.correct.e);          /* 中文题干 → 必须把英文答案念出来 */
         $all(".opt").forEach(function(o, j){ if(opts[j].e === r.correct.e) o.classList.add("correct"); });
       }
       setTimeout(function(){
         cur++;
         if(cur < rounds.length) renderRound(); else finishGame(correct, rounds.length, "看中文选英文");
-      }, 1100);
+      }, 1700);
     };
   }
   renderRound();
@@ -651,6 +657,7 @@ function startSort(){
       if(correct === pool.length) setTimeout(function(){ finishGame(correct, pool.length, "分类归筐"); }, 700);
     } else {
       fb.textContent = "❌ 这个不属于这里"; fb.className = "feedback no";
+      speak(p.w.e);
       bEl.classList.add("miss");
       setTimeout(function(){ bEl.classList.remove("miss"); }, 600);
     }
@@ -709,9 +716,10 @@ function startChallenge(){
     } else {
       el.classList.add("wrong"); streak = 0;
       fb.textContent = "❌ " + q.w.e; fb.className = "feedback no";
+      speak(q.w.e);
       $all(".opt").forEach(function(o, j){ if(q.opts[j].e === q.w.e) o.classList.add("correct"); });
     }
-    setTimeout(function(){ q = nextQ(); locked = false; draw(); }, 700);
+    setTimeout(function(){ q = nextQ(); locked = false; draw(); }, 1300);
   };
   function endChallenge(){
     clearInterval(timer);
