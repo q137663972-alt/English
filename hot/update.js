@@ -1,0 +1,11 @@
+window.APP_UPDATE={
+  "code": 7,
+  "name": "2.3.0",
+  "note": "同步语文乐园 2.3.2 架构：升级自动清热更残留、电视盒子判定修正、遥控器确认键防双击",
+  "apk": "https://q137663972-alt.github.io/English/apk/EnglishPlayground.apk",
+  "apkMirror": "https://cdn.jsdelivr.net/gh/q137663972-alt/English@cd2806d1f44e43da380bf18705ae5e5f7da31f83/apk/EnglishPlayground.apk",
+  "phone": "https://q137663972-alt.github.io/English/apk/EnglishPlayground.apk",
+  "phoneMirror": "https://cdn.jsdelivr.net/gh/q137663972-alt/English@cd2806d1f44e43da380bf18705ae5e5f7da31f83/apk/EnglishPlayground.apk",
+  "tv": "https://q137663972-alt.github.io/English/apk/EnglishPlayground.apk",
+  "tvMirror": "https://cdn.jsdelivr.net/gh/q137663972-alt/English@cd2806d1f44e43da380bf18705ae5e5f7da31f83/apk/EnglishPlayground.apk"
+};
